@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modelsToRender.forEach(model => {
             const thumb = document.createElement('div');
             thumb.className = 'thumbnail';
-            // Store the unique path to the model to fetch details later
             thumb.dataset.modelPath = model.path;
             thumb.innerHTML = `
                 <img src="${model.thumb}" alt="${model.name}">
@@ -37,24 +36,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function showDetail(model) {
-        // URL-encode the path to handle special characters and slashes
         const encodedModelPath = encodeURIComponent(model.path);
         fetch(`/api/model/${encodedModelPath}`)
             .then(response => {
                 if (!response.ok) {
-                    return 'Readme.txt not found for this model.';
+                    throw new Error('Model details not found.');
                 }
-                return response.text();
+                return response.json();
             })
-            .then(readme => {
-                // Sanitize text and convert URLs to links
-                const sanitizedText = readme.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            .then(data => {
+                // Sanitize and linkify readme content
+                const sanitizedText = data.readme.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const linkedText = sanitizedText.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+                // Create file download links
+                let filesHtml = '<h3>Download Files:</h3><ul>';
+                if (data.files && data.files.length > 0) {
+                    data.files.forEach(file => {
+                        // The full path for the download link
+                        const downloadPath = `${model.path}/${file}`;
+                        filesHtml += `<li><a href="/api/download/${downloadPath}" download>${file}</a></li>`;
+                    });
+                } else {
+                    filesHtml += '<li>No model files found.</li>';
+                }
+                filesHtml += '</ul>';
 
                 detailContent.innerHTML = `
                     <h2>${model.name}</h2>
                     <pre>${linkedText}</pre>
+                    ${filesHtml}
                 `;
+                detail.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error fetching model details:', error);
+                detailContent.innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
                 detail.style.display = 'block';
             });
     }
