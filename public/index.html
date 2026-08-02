@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Models</title>
+    <style>
+        body { font-family: sans-serif; }
+        #filter { width: 100%; padding: 10px; margin-bottom: 20px; }
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+        .thumbnail { cursor: pointer; text-align: center; }
+        .thumbnail img { width: 100%; height: auto; }
+        #detail { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; padding: 20px; box-sizing: border-box; }
+        #detail-content { max-width: 800px; margin: 0 auto; }
+        #close-detail { position: absolute; top: 20px; right: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <input type="text" id="filter" placeholder="Filter models...">
+
+    <div id="gallery"></div>
+
+    <div id="detail">
+        <div id="close-detail">X</div>
+        <div id="detail-content"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
