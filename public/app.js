@@ -47,9 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.text();
             })
             .then(readme => {
+                // Sanitize text and convert URLs to links
+                const sanitizedText = readme.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const linkedText = sanitizedText.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
                 detailContent.innerHTML = `
                     <h2>${model.name}</h2>
-                    <pre>${readme}</pre>
+                    <pre>${linkedText}</pre>
                 `;
                 detail.style.display = 'block';
             });
