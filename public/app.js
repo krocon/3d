@@ -19,12 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
         modelsToRender.forEach(model => {
             const thumb = document.createElement('div');
             thumb.className = 'thumbnail';
-            thumb.dataset.modelName = model.name;
+            // Store the unique path to the model to fetch details later
+            thumb.dataset.modelPath = model.path;
             thumb.innerHTML = `
-                <img src="/thumbs/${model.name}.jpg" alt="${model.name}">
+                <img src="${model.thumb}" alt="${model.name}">
                 <p>${model.name}</p>
             `;
-            thumb.addEventListener('click', () => showDetail(model.name));
+            thumb.addEventListener('click', () => showDetail(model));
             gallery.appendChild(thumb);
         });
     }
@@ -35,12 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
         renderGallery(filteredModels);
     });
 
-    function showDetail(modelName) {
-        fetch(`/api/model/${modelName}`)
-            .then(response => response.text())
+    function showDetail(model) {
+        // URL-encode the path to handle special characters and slashes
+        const encodedModelPath = encodeURIComponent(model.path);
+        fetch(`/api/model/${encodedModelPath}`)
+            .then(response => {
+                if (!response.ok) {
+                    return 'Readme.txt not found for this model.';
+                }
+                return response.text();
+            })
             .then(readme => {
                 detailContent.innerHTML = `
-                    <h2>${modelName}</h2>
+                    <h2>${model.name}</h2>
                     <pre>${readme}</pre>
                 `;
                 detail.style.display = 'block';
