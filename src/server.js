@@ -51,8 +51,8 @@ app.get('/api/models', async (req, res) => {
   }
 });
 
-app.get('/api/model/:modelPath', async (req, res) => {
-    const modelPath = req.params.modelPath;
+app.get('/api/model/*', async (req, res) => {
+    const modelPath = req.params[0];
     const modelDir = path.join(thirdpartyDir, modelPath);
 
     try {
@@ -69,15 +69,48 @@ app.get('/api/model/:modelPath', async (req, res) => {
         // Find model files
         const modelFiles = entries.filter(file => modelExtensions.includes(path.extname(file).toLowerCase()));
 
+        // Find images
+        const imageFiles = entries.filter(file => imageExtensions.includes(path.extname(file).toLowerCase()));
+        const relativePathParts = modelPath.split('/');
+        const outputFileName = relativePathParts.join('-').replace(/ /g, '_');
+
+        const images = imageFiles.map(file => {
+            const safeImgName = file.replace(/[^a-zA-Z0-9._-]/g, '_');
+            return {
+                name: file,
+                fullUrl: `/api/image/${modelPath}/${file}`,
+                thumbUrl: `/thumbs/${outputFileName}__${safeImgName}.jpg`
+            };
+        });
+
         res.json({
             readme: readmeContent,
-            files: modelFiles
+            files: modelFiles,
+            images: images
         });
 
     } catch (error) {
         console.error('Error reading model details:', error);
         res.status(404).send('Model details not found');
     }
+});
+
+app.get('/api/image/*', (req, res) => {
+    const filePath = req.params[0];
+    const absolutePath = path.join(thirdpartyDir, filePath);
+
+    if (!absolutePath.startsWith(thirdpartyDir)) {
+        return res.status(403).send('Forbidden');
+    }
+
+    res.sendFile(absolutePath, (err) => {
+        if (err) {
+            console.error('Error sending image file:', err);
+            if (!res.headersSent) {
+                res.status(404).send('Image not found.');
+            }
+        }
+    });
 });
 
 // Use a wildcard to capture the full file path for download
