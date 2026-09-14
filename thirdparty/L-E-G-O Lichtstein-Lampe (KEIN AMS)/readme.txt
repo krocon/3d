@@ -1,24 +1,45 @@
 L-E-G-O Lichtstein-Lampe (KEIN AMS)
 
-https://makerworld.com/de/models/2181470-l-e-g-o-light-brick-lamp-no-ams?from=recommend#profileId-2367761
+https://makerworld.com/de/models/1111830-lego-lightbox-lamp#profileId-1108539
 
+L E G O Lightbox - led
 
-Dieser L-E-G-O-Stil Leuchtstein ist als funktionale LED-Lampe und Ausstellungsstück für Fans, Macher und Sammler konzipiert
+Dimension for print A1 - P1 - X1
 
-Der Stein verfügt über eine stufenlos einstellbare weiße LED-Hintergrundbeleuchtung, mit der Sie die Helligkeit steuern können, wodurch er sich für Umgebungsbeleuchtung, Schreibtisch-Setups, Regale oder Nachtbeleuchtung eignet
+24.5x12.5x3,5cm 
 
-Das Design ist für den Druck ohne Stützen und eine einfache Montage optimiert
+ 
 
-Der weiße Diffusor sollte besser mit PETG gedruckt werden, er fokussiert das Licht perfekt nur auf die Steinbuchstaben
+Dimension for print A1mini
 
+17.5x9x3,5cm 
 
+ 
 
-Druckhinweise:
+To illuminate the lamp I used LED strips powered by a USB connector.
+So you can power the lamp by connecting it to your PC, powerbank or smartphone charger.
 
-Druckfreundlich, minimale Stützen, keine speziellen Einstellungen
-Verwenden Sie PETG/ABS für den Diffusor
-Montage:
+ 
 
-Keine besonderen Anforderungen, einfach alle Teile zusammenfügen Oder sehen Sie sich die Videoanleitung zur Montage an
+As you can see from the photos I applied two white layers on the black cap in order to have uniform lighting.
 
-https://www.youtube.com/watch?v=NyCVN8kjORY
+I recommend applying the strip as shown in the photo.
+
+ 
+
+All the necessary material can be found on the bambu store
+
+ 
+
+If you are an enthusiast, also take a look at the keychain
+
+https://makerworld.com/en/models/1138565#profileId-1140502
+
+Boost Me
+
+Druckeinstellungen:
+- Druckprofil: Print Profile FOR A1 - P1 series - X1 series
+- Schichthöhe: 0.21 mm
+- Wandlinien: 3
+- Infill: 15%
+- Filament: PLA (#FFFFFF), PLA (#000000), PLA (#F7D959), PLA (#C12E1E)

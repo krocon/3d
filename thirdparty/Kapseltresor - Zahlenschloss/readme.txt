@@ -2,76 +2,86 @@ Kapseltresor - Zahlenschloss
 
 https://makerworld.com/de/models/956319-capsule-vault-combination-lock#profileId-925318
 
-Kapseltresor – Zahlenschloss
-Der Kapseltresor ist eine kompakte und sichere Aufbewahrungslösung mit Zahlenschloss, die die modulare Reisekapsel ergänzt, welche in verschiedenen Größen erhältlich ist Er verfügt über einen 4-stelligen Zahlenschlossmechanismus mit vier nummerierten Wählscheiben, der 10.000 mögliche Passwortkombinationen für erhöhte Sicherheit bietet Das Passwort lässt sich durch Umpositionierung der äußeren Wählscheiben während der Montage vollständig anpassen, was Flexibilität und Personalisierung ermöglicht
+### Capsule Vault - Combination Lock
 
+The Capsule Vault is a compact and secure storage solution with a combination lock designed to complement the modular Travel Capsule, which is available in various sizes. It features a 4-digit combination lock mechanism with four numbered dials, offering 10,000 possible password combinations for enhanced security. The password can be fully customized by repositioning the outer dials during assembly, allowing for flexibility and personalization.
 
+ 
 
-Um den Tresor zu öffnen, wählen Sie die richtige Kombination, und der federbelastete Mechanismus rastet ein, sodass sich die Kappe in das Gewinde einhakt Dies ermöglicht das Drehen des Gewindes und das Öffnen des Behälters Wird der falsche Code gewählt, rutscht die Kappe weiter, wodurch das Gewinde nicht einrastet und der Behälter sicher verschlossen bleibt Um den Tresor zu verriegeln, drehen Sie einfach zwei der Wählscheibenringe in entgegengesetzte Richtungen und aktivieren Sie den Verriegelungsmechanismus erneut
+To unlock the vault, dial the correct combination, and the spring-loaded mechanism engages, allowing the cap to lock into the thread. This enables the thread to turn and the container to open. When the wrong code is dialed, the cap continues to slip, preventing the thread from engaging and keeping the container securely locked. To lock the vault, simply turn two of the dial rings in opposite directions, reactivating the locking mechanism.
 
+ 
 
+Two options are available for the internal spring: a 3D-printed PLA spring or adapters for metal springs. Metal springs are recommended, as PLA springs will lose their elasticity after a short period of time due to constant compression (creep). The printed spring is intended solely as a temporary solution to get started quickly for testing and experimenting with the mechanism if metal springs are not immediately available.
 
-Für die interne Feder stehen zwei Optionen zur Verfügung: eine 3D-gedruckte PLA-Feder oder Adapter für Metallfedern Metallfedern werden empfohlen, da PLA-Federn aufgrund der ständigen Kompression (Kriechverhalten) nach kurzer Zeit ihre Elastizität verlieren Die gedruckte Feder dient lediglich als temporäre Lösung, um schnell mit dem Testen und Experimentieren mit dem Mechanismus zu beginnen, falls keine Metallfedern sofort verfügbar sind
+For the prototype, I used metal springs sized 7.5 x 35.8 x 0.7 mm. Springs from Bambu Lab's Maker's Supply have also been tested and work well with this setup, particularly the 0.6 x 8 x 40 mm springs (BB017).
 
+### Video Tutorial
 
-Für den Prototyp habe ich Metallfedern der Größe 7,5 x 35,8 x 0,7 mm verwendet Federn aus dem Maker’s Supply von Bambu Lab wurden ebenfalls getestet und funktionieren gut mit diesem Aufbau, insbesondere die 0,6 x 8 x 40 mm Federn (BB017)
+### 
 
-Videoanleitung
+### 
+Assembly Instructions
 
+* Assemble the Dial Rings
+Combine the outer and inner dial rings. The notch on the top side of the inner dial ring serves as an orientation marker, indicating the relevant number for the pin code.
 
-Montageanleitung
-Montage der Wählscheibenringe
-Verbinden Sie die äußeren und inneren Wählscheibenringe Die Kerbe an der Oberseite des inneren Wählscheibenrings dient als Orientierungsmarkierung und zeigt die entsprechende Nummer für den PIN-Code an
+ 
+* Attach the Core Component
+Place the &#34;core&#34; component, which has the lock pins, onto the bottom plate with the thread around it.
 
+ 
+* Insert the Center Screw
+Pass the center screw through the bottom of the assembly.
 
-Anbringen der Kernkomponente
-Platzieren Sie die „Kern“-Komponente, die die Sperrstifte enthält, auf die Bodenplatte mit dem Gewinde darum herum
+ 
+* Install the Dial Rings
+Place the assembled dial rings onto the &#34;core&#34; component. The rings will only fit in one correct position. After placing all the dial rings, verify that your desired pin code is aligned. Here my pin is going to be “8392”.
 
+ 
+* Insert the Spring (two Options)
+Insert the spring into the slot on the center screw. Ensure the side with the beveled edges is facing downwards.
+ 
 
-Einsetzen der Mittelschraube
-Führen Sie die Mittelschraube von unten durch die Baugruppe
+*  PLA/PETG version (not recommended for permanent use)
+There are two different lengths of the PLA spring in my print profile. It seems the long version works better for most people.
 
+* Metal spring (7.5mm x 35.8mm x 0.7 mm)
+ 
 
-Anbringen der Wählscheibenringe
-Setzen Sie die zusammengebauten Wählscheibenringe auf die „Kern“-Komponente Die Ringe passen nur in einer korrekten Position Nachdem Sie alle Wählscheibenringe angebracht haben, vergewissern Sie sich, dass Ihr gewünschter PIN-Code ausgerichtet ist Hier ist mein PIN „8392“
+ 
 
+* Attach the Cap
+Place the cap on top of the assembly. It fits in two positions, so ensure the marking on the side of the cap aligns with your desired pin. When pushing down the cap, it will push out the center screw from the bottom. Hold the entire assembly in your hands during this step. If the assembly is lying on a flat surface, the screw on the bottom cannot be pushed out properly.
 
-Einsetzen der Feder (zwei Optionen)
-Setzen Sie die Feder in den Schlitz an der Mittelschraube ein Achten Sie darauf, dass die Seite mit den abgeschrägten Kanten nach unten zeigt
+ 
 
- PLA/PETG-Version (nicht für den dauerhaften Gebrauch empfohlen)
-Es gibt zwei verschiedene Längen der PLA-Feder in meinem Druckprofil Es scheint, dass die lange Version für die meisten Menschen besser funktioniert
+* Secure with the Screw
+Finally, screw in the center screw from the bottom to secure the entire assembly.
+ 
 
-Metallfeder (7,5 mm x 35,8 mm x 0,7 mm)
+ 
 
+### Problem Solving / FAQ
 
+* Problem: 
 
+* If turning the rotary dials feels stiff or won’t move at all
 
+* Solutions:
 
+* Make sure the inner dial is oriented correctly.
+* If necessary, apply a small amount of lubricant to the middle piece (the “core component”) to reduce friction.
 
+ 
 
+Boost MeIf you enjoy this design and want to support my work, please consider boosting my models. Your support helps me create more unique designs. Thank you! 
 
+### Please also check out my other models
 
-Anbringen der Kappe
-Setzen Sie die Kappe oben auf die Baugruppe Sie passt in zwei Positionen, stellen Sie daher sicher, dass die Markierung an der Seite der Kappe mit Ihrem gewünschten PIN übereinstimmt Wenn Sie die Kappe nach unten drücken, wird die Mittelschraube von unten herausgedrückt Halten Sie die gesamte Baugruppe während dieses Schritts in Ihren Händen Liegt die Baugruppe auf einer ebenen Fläche, kann die Schraube unten nicht richtig herausgedrückt werden
-
-
-
-
-
-
-
-Sichern mit der Schraube
-Schrauben Sie zum Schluss die Mittelschraube von unten fest, um die gesamte Baugruppe zu sichern
-
-
-
-
-
-
-Problemlösung / FAQ
-Problem:
-Das Drehen der Drehwähler fühlt sich steif an oder bewegt sich gar nicht
-Lösungen:
-Stellen Sie sicher, dass der innere Wählscheibenring korrekt ausgerichtet ist
-Tragen Sie gegebenenfalls eine kleine Menge Schmiermittel auf das Mittelstück (die „Kernkomponente“) auf, um die Reibung zu verringern
+Druckeinstellungen:
+- Druckprofil: 0.2mm layer, 2 walls, 15% infill
+- Schichthöhe: 0.2 mm
+- Wandlinien: 2
+- Infill: 15%
+- Filament: PLA (#000000), PLA (#FFFFFF)
