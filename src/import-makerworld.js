@@ -4,6 +4,44 @@ import { execSync } from 'child_process';
 
 const thirdpartyDir = path.join(process.cwd(), 'thirdparty');
 
+/**
+ * ============================================================================
+ * LINKLISTE / URL_LIST
+ * ============================================================================
+ * Trage hier beim nächsten Mal deine MakerWorld-Links als String-Array ein.
+ *
+ * Beispiele:
+ *
+ * 1. Als einfaches String-Array:
+ * export const URL_LIST = [
+ *   'https://makerworld.com/de/models/1724774-pencil-container#profileId-1831063',
+ *   'https://makerworld.com/de/models/3213113-big-kodak-film-roll#profileId-3637348'
+ * ];
+ *
+ * 2. Optional mit eigenem deutschen Modellnamen:
+ * export const URL_LIST = [
+ *   { url: 'https://makerworld.com/de/models/1724774...', title: 'Bleistift-Behälter' }
+ * ];
+ *
+ * Nach dem Eintragen einfach ausführen:
+ *   npm run import-models
+ *   (oder: node src/import-makerworld.js)
+ * ============================================================================
+ */
+export const URL_LIST = [
+  // Trage hier deine MakerWorld-URLs ein:
+  'https://makerworld.com/de/models/1830521-panda-mini-gaming-case-3050-4060-5050-5060?from=search#profileId-1954846',
+  'https://makerworld.com/de/models/2700872-shrunk-ghost-s1-itx-case#profileId-2994055',
+  'https://makerworld.com/de/models/177147-photo-studio-light-box#profileId-194795',
+  'https://makerworld.com/de/models/1471547-design-lamp-led-lamp-kit-001?from=recommend#profileId-1535842',
+  'https://makerworld.com/de/models/3304820-japandi-star-bowl-autumn-decor-organizer?from=recommend#profileId-3751232',
+  'https://makerworld.com/de/models/2955778-atari-vcs-case-for-raspberry-pi-pi-5-4-3b?from=recommend#profileId-3312363',
+  'https://makerworld.com/de/models/3314912-raspberry-pi-5-split-case-official-active-cooler?from=recommend#profileId-3763591',
+  'https://makerworld.com/de/models/1063966-raspberry-pi-5-ai-m-2-hat-snap-case#profileId-1052672',
+  'https://makerworld.com/de/models/401206-raspberry-pi-5-pimoroni-nvme-case-v1#profileId-304588',
+  'https://makerworld.com/de/models/746241-raspberry-pi-5-case-fan-nvme-geekworm-x1001?from=search#profileId-1605496',
+];
+
 // Helper to strip HTML tags and decode entities
 function cleanHtml(html) {
   if (!html) return '';
@@ -54,7 +92,7 @@ end tell
   }
 }
 
-// Map of known clean German titles for the prompt models
+// Map of known clean German titles for existing models
 const germanTitles = {
   '1724774': 'Bleistiftbehälter - Ein Bleistift-förmiger Behälter',
   '3213113': 'GROSSE Kodak Filmrolle – Stifthalter & Aufbewahrungsbox',
@@ -103,15 +141,25 @@ async function downloadFile(url, destPath) {
     fs.writeFileSync(destPath, buf);
     return true;
   } catch (err) {
-    console.error(`  Failed to download ${url}: ${err.message}`);
+    console.error(`  Fehler beim Download von ${url}: ${err.message}`);
     return false;
   }
 }
 
-async function processModel(url) {
+export async function processModel(input) {
+  let url = '';
+  let customTitle = null;
+
+  if (typeof input === 'string') {
+    url = input.trim().replace(/^[\*\-\s]+/, '');
+  } else if (input && typeof input === 'object') {
+    url = (input.url || '').trim().replace(/^[\*\-\s]+/, '');
+    customTitle = input.title ? input.title.trim() : null;
+  }
+
   const match = url.match(/models\/(\d+)(?:-([^#]+))?(?:#profileId-(\d+))?/);
   if (!match) {
-    console.log(`Skipping invalid URL: ${url}`);
+    console.log(`Ungültige oder unbekannte URL übersprungen: ${url || JSON.stringify(input)}`);
     return;
   }
 
@@ -119,10 +167,10 @@ async function processModel(url) {
   let profileId = match[3];
 
   console.log(`\n======================================================`);
-  console.log(`Processing Design ID: ${designId}`);
+  console.log(`Verarbeite Design-ID: ${designId}`);
   console.log(`URL: ${url}`);
 
-  // 1. Fetch metadata from API
+  // 1. Metadaten von API abrufen
   let designData = null;
   try {
     const resp = await fetch(`https://api.bambulab.com/v1/design-service/design/${designId}`);
@@ -130,21 +178,21 @@ async function processModel(url) {
       designData = await resp.json();
     }
   } catch (e) {
-    console.error(`  Error fetching API data for ${designId}:`, e.message);
+    console.error(`  Fehler beim API-Abruf für ${designId}:`, e.message);
   }
 
   if (!designData) {
-    console.error(`  Could not load data for design ${designId}. Skipping.`);
+    console.error(`  Konnte Daten für Design ${designId} nicht laden. Überspringe.`);
     return;
   }
 
-  // Profile ID fallback
+  // Fallback für Profil-ID
   if (!profileId && designData.instances?.length > 0) {
     profileId = designData.instances[0].id?.toString() || designData.instances[0].profileId?.toString();
   }
 
-  // Determine Title & Folder Name
-  let title = germanTitles[designId];
+  // Titel und Ordnername ermitteln
+  let title = customTitle || germanTitles[designId];
   if (!title) {
     const tabTitle = runChromeJS(`/models/${designId}`, 'document.title');
     if (tabTitle) {
@@ -155,7 +203,7 @@ async function processModel(url) {
     title = designData.titleTranslated || designData.title || `Model-${designId}`;
   }
 
-  // Clean folder name: sanitize slashes, colons, quotes
+  // Ordnernamen bereinigen (keine Slashes oder ungültige Sonderzeichen)
   const folderName = title
     .replace(/\//g, '-')
     .replace(/[:*?"<>|]/g, '')
@@ -165,15 +213,14 @@ async function processModel(url) {
   const modelDir = path.join(thirdpartyDir, folderName);
   const stlDir = path.join(modelDir, 'stl');
 
-  console.log(`Directory: thirdparty/${folderName}`);
+  console.log(`Zielordner: thirdparty/${folderName}`);
   fs.mkdirSync(modelDir, { recursive: true });
   fs.mkdirSync(stlDir, { recursive: true });
 
-  // 2. Generate and write readme.txt
+  // 2. readme.txt erstellen
   const readmePath = path.join(modelDir, 'readme.txt');
   let descriptionText = cleanHtml(designData.summary || designData.description || '');
 
-  // Add instance / profile print details if available
   let profileNotes = '';
   const selectedInstance = (designData.instances || []).find(i => i.id == profileId) || designData.instances?.[0];
   if (selectedInstance) {
@@ -195,9 +242,9 @@ async function processModel(url) {
 
   const readmeContent = `${title}\n\n${url}\n\n${descriptionText}${profileNotes}\n`;
   fs.writeFileSync(readmePath, readmeContent, 'utf8');
-  console.log(`  [OK] readme.txt saved (${readmeContent.length} bytes)`);
+  console.log(`  [OK] readme.txt geschrieben (${readmeContent.length} Zeichen)`);
 
-  // 3. Download images
+  // 3. Bilder herunterladen
   const pictures = designData.designExtension?.design_pictures || [];
   const imageUrls = [];
   if (designData.coverPortrait) imageUrls.push(designData.coverPortrait);
@@ -207,7 +254,7 @@ async function processModel(url) {
     }
   }
 
-  console.log(`  Downloading ${imageUrls.length} image(s)...`);
+  console.log(`  Lade ${imageUrls.length} Bild(er) herunter...`);
   for (let i = 0; i < imageUrls.length; i++) {
     const imgUrl = imageUrls[i];
     const ext = path.extname(new URL(imgUrl).pathname) || '.webp';
@@ -217,9 +264,9 @@ async function processModel(url) {
       await downloadFile(imgUrl, destPath);
     }
   }
-  console.log(`  [OK] Images downloaded`);
+  console.log(`  [OK] Bilder vorhanden`);
 
-  // 4. Try 3MF & STL Download via Chrome session
+  // 4. Download 3MF & STL über Chrome-Sitzung versuchen
   let dl3mfUrl = null;
   let dlZipUrl = null;
 
@@ -250,69 +297,177 @@ async function processModel(url) {
       }
     }
   } catch (err) {
-    // Ignore and proceed
+    // Fehler bei Chrome-Abfrage ignorieren
   }
 
-  // Download 3MF if signed URL is available
+  // 3MF speichern wenn URL signiert vorhanden
   if (dl3mfUrl?.url) {
     const fileName = dl3mfUrl.name || `${folderName}.3mf`;
     const target3mf = path.join(modelDir, fileName);
-    console.log(`  Downloading 3MF: ${fileName}...`);
+    console.log(`  Lade 3MF: ${fileName}...`);
     await downloadFile(dl3mfUrl.url, target3mf);
-    console.log(`  [OK] 3MF file saved: ${fileName}`);
+    console.log(`  [OK] 3MF gespeichert: ${fileName}`);
   } else {
-    console.log(`  [INFO] 3MF direct signed download requires captcha verification`);
+    console.log(`  [INFO] 3MF-Download erfordert Browser-Captcha-Bestätigung`);
   }
 
-  // Download STL Zip if signed URL is available
+  // STL Zip herunterladen & entpacken wenn signiert vorhanden
   if (dlZipUrl?.url) {
     const zipDest = path.join(modelDir, dlZipUrl.name || 'model_stls.zip');
-    console.log(`  Downloading STL Archive...`);
+    console.log(`  Lade STL-Archiv herunter...`);
     const ok = await downloadFile(dlZipUrl.url, zipDest);
     if (ok) {
       try {
         execSync(`unzip -o -q "${zipDest}" -d "${stlDir}"`);
-        console.log(`  [OK] Extracted STLs to stl/`);
+        console.log(`  [OK] STLs entpackt nach stl/`);
       } catch (err) {
-        console.error(`  Failed to extract zip: ${err.message}`);
+        console.error(`  Fehler beim Entpacken der ZIP: ${err.message}`);
       }
     }
   } else {
-    console.log(`  [INFO] STL archive direct signed download requires captcha verification`);
+    console.log(`  [INFO] STL-Archiv-Download erfordert Browser-Captcha-Bestätigung`);
   }
 
-  console.log(`[DONE] ${folderName}`);
+  console.log(`[ABGESCHLOSSEN] ${folderName}`);
 }
 
-async function main() {
-  const promptFile = path.join(process.cwd(), 'prompt001.md');
-  const content = fs.readFileSync(promptFile, 'utf8');
-  const urls = content
-    .split('\n')
-    .map(l => l.trim())
-    .filter(l => l.startsWith('* https://makerworld.com'))
-    .map(l => l.replace(/^\*\s*/, ''));
+/**
+ * Hauptfunktion zum Abarbeiten eines Arrays von URLs:
+ * @param {string[]} inputUrls - Array von MakerWorld-URLs
+ */
+export async function importUrls(inputUrls) {
+  if (!Array.isArray(inputUrls) || inputUrls.length === 0) {
+    console.log('Keine URLs übergeben.');
+    return;
+  }
 
-  const uniqueUrls = [...new Set(urls)];
-  console.log(`Found ${uniqueUrls.length} unique models to import.\n`);
+  // Duplikate bereinigen und Einträge normalisieren
+  const seen = new Set();
+  const itemsToProcess = [];
+  for (const item of inputUrls) {
+    let url = '';
+    if (typeof item === 'string') {
+      url = item.trim().replace(/^[\*\-\s]+/, '');
+    } else if (item && typeof item === 'object') {
+      url = (item.url || '').trim().replace(/^[\*\-\s]+/, '');
+    }
+    if (!url || !url.includes('makerworld.com')) continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    itemsToProcess.push(item);
+  }
 
-  for (let i = 0; i < uniqueUrls.length; i++) {
-    console.log(`\n>>> [${i + 1}/${uniqueUrls.length}] Starting import`);
-    await processModel(uniqueUrls[i]);
-    // Small pause between models
-    await new Promise(r => setTimeout(r, 500));
+  if (itemsToProcess.length === 0) {
+    console.log('Keine gültigen MakerWorld-URLs gefunden.');
+    return;
+  }
+
+  console.log(`Starte Import für ${itemsToProcess.length} Modell(e)...`);
+
+  for (let i = 0; i < itemsToProcess.length; i++) {
+    console.log(`\n>>> [${i + 1}/${itemsToProcess.length}] Starte Modell`);
+    await processModel(itemsToProcess[i]);
+    await new Promise(r => setTimeout(r, 400));
   }
 
   console.log(`\n======================================================`);
-  console.log(`All models processed! Running generate-thumbs...`);
+  console.log(`Alle Modelle verarbeitet! Aktualisiere Thumbnails...`);
   try {
     execSync('npm run generate-thumbs', { stdio: 'inherit' });
-    console.log(`Thumbnail generation finished successfully.`);
+    console.log(`Thumbnail-Generierung erfolgreich abgeschlossen.`);
   } catch (e) {
-    console.error(`Thumbnail generation error: ${e.message}`);
+    console.error(`Thumbnail-Generierung fehlgeschlagen: ${e.message}`);
   }
 }
 
-main().catch(err => {
-  console.error('Fatal error:', err);
-});
+// CLI- und Ausführungslogik
+async function run() {
+  const args = process.argv.slice(2);
+
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('Verwendung von import-makerworld:');
+    console.log('1. String-Array im Code: URL_LIST in src/import-makerworld.js definieren und "npm run import-models" ausführen');
+    console.log('2. JSON-Array via CLI: node src/import-makerworld.js \'["https://makerworld.com/..."]\'');
+    console.log('3. URLs direkt via CLI: node src/import-makerworld.js "https://makerworld.com/..." "https://..."');
+    console.log('4. Datei übergeben: node src/import-makerworld.js --file urls.json');
+    console.log('5. links.json im Projekt-Root anlegen und "npm run import-models" ausführen');
+    return;
+  }
+
+  // 1. CLI Argument: JSON Array als einzelner String
+  if (args.length === 1 && args[0].startsWith('[') && args[0].endsWith(']')) {
+    try {
+      const parsed = JSON.parse(args[0]);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        console.log(`Verwende ${parsed.length} URLs aus übergebenem JSON-Array.`);
+        await importUrls(parsed);
+        return;
+      }
+    } catch {}
+  }
+
+  // 2. CLI Argumente: URLs direkt als Argumente übergeben
+  const cliUrls = args.filter(a => a.startsWith('http://') || a.startsWith('https://') || a.includes('makerworld.com'));
+  if (cliUrls.length > 0) {
+    console.log('Verwende URLs aus CLI-Argumenten.');
+    await importUrls(cliUrls);
+    return;
+  }
+
+  // 3. CLI Argument: Datei übergeben mit --file <dateipfad>
+  const fileArgIdx = args.indexOf('--file');
+  if (fileArgIdx !== -1 && args[fileArgIdx + 1]) {
+    const filePath = path.resolve(process.cwd(), args[fileArgIdx + 1]);
+    console.log(`Lese URLs aus Datei: ${filePath}`);
+    const raw = fs.readFileSync(filePath, 'utf8');
+    let urls = [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) urls = parsed;
+    } catch {
+      urls = raw
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.includes('makerworld.com'))
+        .map(l => l.replace(/^[\*\-\s]+/, ''));
+    }
+    await importUrls(urls);
+    return;
+  }
+
+  // 4. Wenn URL_LIST im Code gefüllt ist
+  if (Array.isArray(URL_LIST) && URL_LIST.length > 0) {
+    console.log(`Verwende ${URL_LIST.length} URL(s) aus exportierter URL_LIST.`);
+    await importUrls(URL_LIST);
+    return;
+  }
+
+  // 5. Fallback: links.json falls im Projektverzeichnis vorhanden
+  const linksJsonPath = path.join(process.cwd(), 'links.json');
+  if (fs.existsSync(linksJsonPath)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(linksJsonPath, 'utf8'));
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        console.log(`Verwende ${parsed.length} URLs aus links.json...`);
+        await importUrls(parsed);
+        return;
+      }
+    } catch (e) {
+      console.warn(`Warnung: links.json konnte nicht gelesen werden: ${e.message}`);
+    }
+  }
+
+  // 6. Wenn keine URLs angegeben sind, Hilfestellung ausgeben
+  console.log('\nHinweis: Aktuell sind keine URLs angegeben.');
+  console.log('So kannst du beim nächsten Mal URLs importieren:');
+  console.log('  1. Trage URLs in src/import-makerworld.js in URL_LIST = [...] ein und führe "npm run import-models" aus.');
+  console.log('  2. Lege eine Datei "links.json" mit einem String-Array im Hauptverzeichnis an.');
+  console.log('  3. Über die Befehlszeile: node src/import-makerworld.js "https://makerworld.com/..."');
+  console.log('  4. JSON-Array via Terminal: node src/import-makerworld.js \'["https://..."]\'');
+  console.log('  5. Beliebige Datei einlesen: node src/import-makerworld.js --file prompt001.md\n');
+}
+
+// Direkt ausführen wenn über CLI gestartet
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  run().catch(err => console.error('Unerwarteter Fehler:', err));
+}
