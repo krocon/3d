@@ -17,11 +17,13 @@ async function findModels(currentDir, relativePathParts = []) {
         const hasImage = entries.some(e => !e.isDirectory() && imageExtensions.includes(path.extname(e.name).toLowerCase()));
 
         if (hasImage && relativePathParts.length > 0) {
-            const modelName = relativePathParts.join(' - ');
+            const group = relativePathParts.length > 1 ? relativePathParts[0] : '';
+            const modelName = relativePathParts.length > 1 ? relativePathParts.slice(1).join(' - ') : relativePathParts[0];
             const modelPath = relativePathParts.join('/');
             const thumbName = relativePathParts.join('-').replace(/ /g, '_');
             models.push({
                 name: modelName,
+                group: group,
                 path: modelPath,
                 thumb: `/thumbs/${thumbName}.jpg`
             });
@@ -29,7 +31,7 @@ async function findModels(currentDir, relativePathParts = []) {
         }
 
         for (const entry of entries) {
-            if (entry.isDirectory()) {
+            if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'stl') {
                 const nextPathParts = [...relativePathParts, entry.name];
                 const nextDir = path.join(currentDir, entry.name);
                 models = models.concat(await findModels(nextDir, nextPathParts));
@@ -42,21 +44,31 @@ async function findModels(currentDir, relativePathParts = []) {
 }
 
 app.get('/api/models', async (req, res) => {
-  try {
-    const models = await findModels(thirdpartyDir);
-    res.json(models);
-  } catch (error) {
-    console.error('Error reading model directory:', error);
-    res.status(500).send('Error reading model directory');
-  }
+    try {
+        const models = await findModels(thirdpartyDir);
+        // Sort alphabetically by group, then by name
+        models.sort((a, b) => {
+            const gComp = (a.group || '').localeCompare(b.group || '', 'de', { sensitivity: 'base' });
+            if (gComp !== 0) return gComp;
+            return a.name.localeCompare(b.name, 'de', { sensitivity: 'base' });
+        });
+        res.json(models);
+    } catch (error) {
+        console.error('Error reading model directory:', error);
+        res.status(500).send('Error reading model directory');
+    }
 });
 
 app.get('/api/model/*', async (req, res) => {
     const modelPath = req.params[0];
     const modelDir = path.join(thirdpartyDir, modelPath);
 
+    if (!modelDir.startsWith(thirdpartyDir)) {
+        return res.status(403).send('Forbidden');
+    }
+
     try {
-        const entries = await fs.readdir(modelDir);
+        const entries = await fs.readdir(modelDir, { withFileTypes: true });
 
         // Find readme
         let readmeContent = '';
@@ -66,11 +78,28 @@ app.get('/api/model/*', async (req, res) => {
             // readme.txt not found, which is fine
         }
 
-        // Find model files
-        const modelFiles = entries.filter(file => modelExtensions.includes(path.extname(file).toLowerCase()));
+        // Find model files (.3mf, .stl) in model directory
+        let modelFiles = entries
+            .filter(e => !e.isDirectory() && modelExtensions.includes(path.extname(e.name).toLowerCase()))
+            .map(e => e.name);
+
+        // Also check stl/ subfolder if present
+        try {
+            const stlDir = path.join(modelDir, 'stl');
+            const stlEntries = await fs.readdir(stlDir, { withFileTypes: true });
+            const stlFiles = stlEntries
+                .filter(e => !e.isDirectory() && modelExtensions.includes(path.extname(e.name).toLowerCase()))
+                .map(e => `stl/${e.name}`);
+            modelFiles = modelFiles.concat(stlFiles);
+        } catch (e) {
+            // stl subfolder does not exist, which is fine
+        }
 
         // Find images
-        const imageFiles = entries.filter(file => imageExtensions.includes(path.extname(file).toLowerCase()));
+        const imageFiles = entries
+            .filter(e => !e.isDirectory() && imageExtensions.includes(path.extname(e.name).toLowerCase()))
+            .map(e => e.name);
+
         const relativePathParts = modelPath.split('/');
         const outputFileName = relativePathParts.join('-').replace(/ /g, '_');
 
@@ -83,7 +112,12 @@ app.get('/api/model/*', async (req, res) => {
             };
         });
 
+        const group = relativePathParts.length > 1 ? relativePathParts[0] : '';
+        const name = relativePathParts.length > 1 ? relativePathParts.slice(1).join(' - ') : relativePathParts[0];
+
         res.json({
+            name,
+            group,
             readme: readmeContent,
             files: modelFiles,
             images: images
@@ -113,12 +147,10 @@ app.get('/api/image/*', (req, res) => {
     });
 });
 
-// Use a wildcard to capture the full file path for download
 app.get('/api/download/*', (req, res) => {
     const filePath = req.params[0];
     const absolutePath = path.join(thirdpartyDir, filePath);
 
-    // Security check: ensure the path is still within the thirdparty directory
     if (!absolutePath.startsWith(thirdpartyDir)) {
         return res.status(403).send('Forbidden');
     }
@@ -126,12 +158,13 @@ app.get('/api/download/*', (req, res) => {
     res.download(absolutePath, (err) => {
         if (err) {
             console.error('Error downloading file:', err);
-            res.status(404).send('File not found.');
+            if (!res.headersSent) {
+                res.status(404).send('File not found.');
+            }
         }
     });
 });
 
-
 app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+    console.log(`Server listening at http://localhost:${port}`);
 });

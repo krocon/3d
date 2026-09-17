@@ -59,6 +59,56 @@
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
         }
 
+        .search-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .group-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .chip {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .chip:hover {
+            background-color: #334155;
+            color: #f8fafc;
+            border-color: #64748b;
+            transform: translateY(-1px);
+        }
+
+        .chip.active {
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 48px 16px;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
         #gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -84,10 +134,29 @@
         }
 
         .thumbnail-img-container {
+            position: relative;
             width: 100%;
             aspect-ratio: 1;
             overflow: hidden;
             background-color: #0f172a;
+        }
+
+        .group-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #38bdf8;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            pointer-events: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .thumbnail img {
@@ -101,14 +170,44 @@
             transform: scale(1.05);
         }
 
-        .thumbnail p {
-            padding: 14px;
+        .thumbnail-info {
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .thumbnail-group {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #38bdf8;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .thumbnail p.model-title {
+            padding: 0;
             font-size: 0.95rem;
             font-weight: 500;
             color: #e2e8f0;
-            text-align: center;
-            line-height: 1.3;
+            text-align: left;
+            line-height: 1.35;
             word-break: break-word;
+        }
+
+        .detail-group-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         /* Detail Modal */
@@ -391,7 +490,10 @@
     <div class="container">
         <header>
             <h1>3D Models Viewer</h1>
-            <input type="text" id="filter" placeholder="Modelle filtern...">
+            <div class="search-wrapper">
+                <input type="text" id="filter" placeholder="Modelle filtern (z.B. Raspberry Pi, Mac, Werkzeug)...">
+            </div>
+            <div id="group-chips" class="group-chips"></div>
         </header>
 
         <div id="gallery"></div>

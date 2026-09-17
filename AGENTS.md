@@ -6,18 +6,19 @@ Dieses Dokument beschreibt die Projektarchitektur, Verzeichniskonventionen und d
 
 ## 1. Verzeichnisstruktur & Datenmodell
 
-Alle Drittanbieter-Modelle befinden sich unter `thirdparty/`. Für jedes Modell gilt folgende feste Struktur:
+Alle Drittanbieter-Modelle befinden sich unter `thirdparty/` geordnet nach Themengruppen (z. B. `Raspberry Pi`, `Mac`, `iPhone`, `Apple`, `Computergehäuse`, `Fotografie`, `Figuren`, `Kunst`, `Vase`, `Schale`, `Werkzeug`, `_Diverse`). Für jedes Modell gilt folgende feste Struktur:
 
 ```text
 thirdparty/
-└── <Deutscher Modellname>/
-    ├── readme.txt                     # Metadaten, Link & Beschreibung
-    ├── <Deutscher Modellname>.jpg/webp # Hauptbild
-    ├── <Deutscher Modellname>-02.jpg  # Zusätzliche Bilder (-02, -03 ...)
-    ├── <Modell>.3mf                   # 3MF-Druckdatei (direkt im Modellordner)
-    └── stl/                           # STL-Dateien (immer im Unterordner stl/)
-        ├── Teil_1.stl
-        └── Teil_2.stl
+└── <Gruppe>/
+    └── <Deutscher Modellname>/
+        ├── readme.txt                     # Metadaten, Link & Beschreibung
+        ├── <Deutscher Modellname>.jpg/webp # Hauptbild
+        ├── <Deutscher Modellname>-02.jpg  # Zusätzliche Bilder (-02, -03 ...)
+        ├── <Modell>.3mf                   # 3MF-Druckdatei (direkt im Modellordner)
+        └── stl/                           # STL-Dateien (immer im Unterordner stl/)
+            ├── Teil_1.stl
+            └── Teil_2.stl
 ```
 
 ### Aufbau von `readme.txt`

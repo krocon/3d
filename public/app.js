@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const gallery = document.getElementById('gallery');
     const filter = document.getElementById('filter');
+    const groupChipsContainer = document.getElementById('group-chips');
     const detail = document.getElementById('detail');
     const detailBody = document.getElementById('detail-body');
     const closeDetail = document.getElementById('close-detail');
@@ -21,11 +22,57 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             models = data;
+            initGroupChips(models);
             renderGallery(models);
         });
 
+    function initGroupChips(modelsData) {
+        if (!groupChipsContainer) return;
+        const uniqueGroups = Array.from(new Set(modelsData.map(m => m.group).filter(Boolean)));
+        uniqueGroups.sort((a, b) => a.localeCompare(b, 'de', { sensitivity: 'base' }));
+        const groups = ['Alle', ...uniqueGroups];
+
+        groupChipsContainer.innerHTML = '';
+        groups.forEach(grp => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'chip' + (grp === 'Alle' ? ' active' : '');
+            chip.textContent = grp;
+            chip.dataset.group = grp;
+            chip.addEventListener('click', () => {
+                if (grp === 'Alle') {
+                    filter.value = '';
+                } else {
+                    filter.value = grp;
+                }
+                filter.dispatchEvent(new Event('input'));
+            });
+            groupChipsContainer.appendChild(chip);
+        });
+    }
+
+    function updateActiveChip(filterVal) {
+        if (!groupChipsContainer) return;
+        const chips = groupChipsContainer.querySelectorAll('.chip');
+        chips.forEach(c => {
+            const grp = c.dataset.group;
+            if (!filterVal && grp === 'Alle') {
+                c.classList.add('active');
+            } else if (filterVal && grp.toLowerCase() === filterVal) {
+                c.classList.add('active');
+            } else {
+                c.classList.remove('active');
+            }
+        });
+    }
+
     function renderGallery(modelsToRender) {
         gallery.innerHTML = '';
+        if (modelsToRender.length === 0) {
+            gallery.innerHTML = '<div class="no-results">Keine Modelle für diese Auswahl gefunden.</div>';
+            return;
+        }
+
         modelsToRender.forEach(model => {
             const thumb = document.createElement('div');
             thumb.className = 'thumbnail';
@@ -33,8 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
             thumb.innerHTML = `
                 <div class="thumbnail-img-container">
                     <img src="${model.thumb}" alt="${model.name}" loading="lazy">
+                    ${model.group ? `<span class="group-badge">${model.group}</span>` : ''}
                 </div>
-                <p>${model.name}</p>
+                <div class="thumbnail-info">
+                    ${model.group ? `<span class="thumbnail-group">${model.group}</span>` : ''}
+                    <p class="model-title">${model.name}</p>
+                </div>
             `;
             thumb.addEventListener('click', () => showDetail(model));
             gallery.appendChild(thumb);
@@ -42,8 +93,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     filter.addEventListener('input', () => {
-        const filterValue = filter.value.toLowerCase();
-        const filteredModels = models.filter(model => model.name.toLowerCase().includes(filterValue));
+        const filterValue = filter.value.toLowerCase().trim();
+        updateActiveChip(filterValue);
+
+        if (!filterValue) {
+            renderGallery(models);
+            return;
+        }
+
+        const filteredModels = models.filter(model => {
+            const nameMatch = model.name && model.name.toLowerCase().includes(filterValue);
+            const groupMatch = model.group && model.group.toLowerCase().includes(filterValue);
+            return nameMatch || groupMatch;
+        });
+
         renderGallery(filteredModels);
     });
 
@@ -98,8 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     thumbsHtml += `</div></div>`;
                 }
 
+                const groupText = data.group || model.group;
+                const modelTitle = data.name || model.name;
+
                 detailBody.innerHTML = `
-                    <h2>${model.name}</h2>
+                    ${groupText ? `<div class="detail-group-badge">${groupText}</div>` : ''}
+                    <h2>${modelTitle}</h2>
                     ${linkedText ? `<pre>${linkedText}</pre>` : ''}
                     ${filesHtml}
                     ${thumbsHtml}
@@ -108,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Add click listeners to detail thumbnails
                 const thumbItems = detailBody.querySelectorAll('.detail-thumb-item');
                 thumbItems.forEach(item => {
-                    item.addEventListener('click', (e) => {
+                    item.addEventListener('click', () => {
                         const idx = parseInt(item.getAttribute('data-index'), 10);
                         openFullscreen(idx);
                     });
