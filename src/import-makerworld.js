@@ -30,15 +30,7 @@ const thirdpartyDir = path.join(process.cwd(), 'thirdparty');
  */
 export const URL_LIST = [
   // Trage hier deine MakerWorld-URLs ein:
-  'https://makerworld.com/de/models/2109056-tintin-rocket-150-cm?from=search#profileId-2281542',
-  'https://makerworld.com/de/models/1055470-volkswagen-type-2-t1-double-cab#profileId-1042896',
-  'https://makerworld.com/de/models/1049043-porsche-911-turbo-930#profileId-1035371',
-  'https://makerworld.com/de/models/505292-1965-shelby-cobra#profileId-420962',
-  'https://makerworld.com/de/models/555215-mercedes-300-sl#profileId-473953',
-  'https://makerworld.com/de/models/3272457-micro-sd-card-storage-holder#profileId-3710824',
-  'https://makerworld.com/de/models/3279974-lemon-container-jar-textured-fruit-stash-box#profileId-3720249',
-  'https://makerworld.com/de/models/3296528-pen-holder#profileId-3740878',
-  'https://makerworld.com/de/models/1790082-working-magnetic-compass?from=search#profileId-1907642'
+  ''
 ];
 
 // Helper to strip HTML tags and decode entities
