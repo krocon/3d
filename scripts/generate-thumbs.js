@@ -6,7 +6,7 @@ const thirdpartyDir = path.join(process.cwd(), 'thirdparty');
 const publicDir = path.join(process.cwd(), 'public', 'thumbs');
 const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 
-async function findModelsAndGenerateThumbs(currentDir, relativePathParts = [], stats = { total: 0, generated: 0 }) {
+async function findModelsAndGenerateThumbs(currentDir, relativePathParts = [], stats = { total: 0, generated: 0 }, validFiles = new Set()) {
     try {
         const entries = await fs.readdir(currentDir, { withFileTypes: true });
         const imageFiles = entries.filter(e => !e.isDirectory() && imageExtensions.includes(path.extname(e.name).toLowerCase()));
@@ -18,7 +18,10 @@ async function findModelsAndGenerateThumbs(currentDir, relativePathParts = [], s
 
             // Generate main thumbnail for gallery (using the first image)
             const mainInputPath = path.join(currentDir, imageFiles[0].name);
-            const mainOutputPath = path.join(publicDir, `${outputFileName}.jpg`);
+            const mainThumbFile = `${outputFileName}.jpg`;
+            const mainOutputPath = path.join(publicDir, mainThumbFile);
+            validFiles.add(mainThumbFile);
+
             try {
                 await sharp(mainInputPath)
                     .resize(300, 300, { fit: 'cover' })
@@ -33,7 +36,10 @@ async function findModelsAndGenerateThumbs(currentDir, relativePathParts = [], s
             for (const img of imageFiles) {
                 const imgInputPath = path.join(currentDir, img.name);
                 const safeImgName = img.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                const imgOutputPath = path.join(publicDir, `${outputFileName}__${safeImgName}.jpg`);
+                const detailThumbFile = `${outputFileName}__${safeImgName}.jpg`;
+                const imgOutputPath = path.join(publicDir, detailThumbFile);
+                validFiles.add(detailThumbFile);
+
                 try {
                     await sharp(imgInputPath)
                         .resize(300, 300, { fit: 'cover' })
@@ -52,7 +58,7 @@ async function findModelsAndGenerateThumbs(currentDir, relativePathParts = [], s
             if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'stl') {
                 const nextPathParts = [...relativePathParts, entry.name];
                 const nextDir = path.join(currentDir, entry.name);
-                await findModelsAndGenerateThumbs(nextDir, nextPathParts, stats);
+                await findModelsAndGenerateThumbs(nextDir, nextPathParts, stats, validFiles);
             }
         }
     } catch (error) {
@@ -64,7 +70,7 @@ async function generateThumbs() {
     try {
         await fs.mkdir(publicDir, { recursive: true });
 
-        // If --clean flag is provided or on full rebuild, remove old thumbnails
+        // If --clean flag is provided, wipe existing thumbnails directory first
         if (process.argv.includes('--clean')) {
             console.log('Cleaning existing thumbnails directory...');
             const existingFiles = await fs.readdir(publicDir);
@@ -75,8 +81,20 @@ async function generateThumbs() {
 
         console.log('Scanning models and generating thumbnails...');
         const stats = { total: 0, generated: 0 };
-        await findModelsAndGenerateThumbs(thirdpartyDir, [], stats);
-        console.log(`Thumbnail generation complete. Models processed: ${stats.total}, Thumbnails generated: ${stats.generated}`);
+        const validFiles = new Set();
+        await findModelsAndGenerateThumbs(thirdpartyDir, [], stats, validFiles);
+
+        // Remove any orphaned thumbnails that do not correspond to existing models/images
+        const existingFiles = await fs.readdir(publicDir);
+        let removedCount = 0;
+        for (const file of existingFiles) {
+            if (!validFiles.has(file)) {
+                await fs.unlink(path.join(publicDir, file));
+                removedCount++;
+            }
+        }
+
+        console.log(`Thumbnail generation complete. Models processed: ${stats.total}, Thumbnails generated: ${stats.generated}${removedCount > 0 ? `, Orphaned thumbnails removed: ${removedCount}` : ''}`);
     } catch (error) {
         console.error('Error generating thumbnails:', error);
     }

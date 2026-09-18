@@ -18,9 +18,9 @@ const thirdpartyDir = path.join(process.cwd(), 'thirdparty');
  *   'https://makerworld.com/de/models/3213113-big-kodak-film-roll#profileId-3637348'
  * ];
  *
- * 2. Optional mit eigenem deutschen Modellnamen:
+ * 2. Optional mit eigenem deutschen Modellnamen und Themengruppe:
  * export const URL_LIST = [
- *   { url: 'https://makerworld.com/de/models/1724774...', title: 'Bleistift-Behälter' }
+ *   { url: 'https://makerworld.com/de/models/1724774...', title: 'Bleistift-Behälter', group: 'Behälter' }
  * ];
  *
  * Nach dem Eintragen einfach ausführen:
@@ -137,15 +137,113 @@ async function downloadFile(url, destPath) {
   }
 }
 
+export const KNOWN_GROUPS = [
+  'Autos',
+  'Leuchten',
+  'Behälter',
+  'Raspberry Pi',
+  'Mac',
+  'iPhone',
+  'Apple',
+  'Computergehäuse',
+  'Fotografie',
+  'Figuren',
+  'Kunst',
+  'Vase',
+  'Schale',
+  'Werkzeug',
+  '_Diverse'
+];
+
+/**
+ * Erkennt automatisch die passende Themengruppe anhand von Titel und Beschreibung.
+ */
+export function detectGroup(title = '', description = '') {
+  const text = `${title} ${description}`.toLowerCase();
+
+  // Autos
+  if (/(auto|automobile|car|fahrzeug|vehicle|porsche|ferrari|bmw|mercedes|fiat|bulli|volkswagen|shelby|cobra|audi|mustang)/i.test(text)) {
+    return 'Autos';
+  }
+  // Leuchten
+  if (/(lampe|leuchte|lichtstein|lichtbox|lamp|light|lantern|desk lamp|night light|led kit|lighting)/i.test(text) && !/(schalter|steckdose|power strip|blackout)/i.test(text)) {
+    return 'Leuchten';
+  }
+  // Behälter
+  if (/(behälter|container|aufbewahrung|organizer|box mit deckel|taschentuchbox|stifthalter|bleistiftbehälter|tresor|vault|dose|trockenmittelbehälter|dispenser|storage)/i.test(text)) {
+    return 'Behälter';
+  }
+  // Raspberry Pi
+  if (/raspberry\s*pi|raspi/i.test(text)) {
+    return 'Raspberry Pi';
+  }
+  // Mac
+  if (/(mac\s*mini|macbook|imac|macintosh|magic mouse)/i.test(text)) {
+    return 'Mac';
+  }
+  // iPhone
+  if (/(iphone|magsafe)/i.test(text)) {
+    return 'iPhone';
+  }
+  // Apple (AirTag, etc.)
+  if (/(airtag|apple watch)/i.test(text)) {
+    return 'Apple';
+  }
+  // Computergehäuse
+  if (/(pc case|itx case|matx|computergehäuse|gehäuse.*gaming)/i.test(text)) {
+    return 'Computergehäuse';
+  }
+  // Fotografie
+  if (/(kamera|camera|objektiv|lens|cineback|v-mount|fotostudio|photo studio)/i.test(text)) {
+    return 'Fotografie';
+  }
+  // Figuren
+  if (/(figur|figure|asterix|obelix|tintin|tim und struppi|gromit|wallace|action figure)/i.test(text)) {
+    return 'Figuren';
+  }
+  // Kunst
+  if (/(wandkunst|wall art|skulptur|sculpture|ornament|glückspille)/i.test(text)) {
+    return 'Kunst';
+  }
+  // Vase
+  if (/vase/i.test(text)) {
+    return 'Vase';
+  }
+  // Schale
+  if (/(schale|bowl)/i.test(text)) {
+    return 'Schale';
+  }
+  // Werkzeug
+  if (/(werkzeug|tool|bosch|sortimo|l-boxx|pbd40|gridfinity|abstreifer|hobel|klemme|zange|schraub|bohrer|sägeblatt)/i.test(text)) {
+    return 'Werkzeug';
+  }
+
+  return '_Diverse';
+}
+
+function findExistingGroup(folderName) {
+  try {
+    const groups = fs.readdirSync(thirdpartyDir, { withFileTypes: true }).filter(d => d.isDirectory());
+    for (const g of groups) {
+      if (fs.existsSync(path.join(thirdpartyDir, g.name, folderName))) {
+        return g.name;
+      }
+    }
+  } catch {}
+  return null;
+}
+
 export async function processModel(input) {
   let url = '';
   let customTitle = null;
+  let customGroup = null;
 
   if (typeof input === 'string') {
     url = input.trim().replace(/^[\*\-\s]+/, '');
   } else if (input && typeof input === 'object') {
     url = (input.url || '').trim().replace(/^[\*\-\s]+/, '');
     customTitle = input.title ? input.title.trim() : null;
+    customGroup = input.group ? input.group.trim() : null;
   }
 
   const match = url.match(/models\/(\d+)(?:-([^#]+))?(?:#profileId-(\d+))?/);
@@ -201,17 +299,21 @@ export async function processModel(input) {
     .replace(/\s+/g, ' ')
     .trim();
 
-  const modelDir = path.join(thirdpartyDir, folderName);
+  const descriptionText = cleanHtml(designData.summary || designData.description || '');
+
+  // Zielgruppe bestimmen
+  const existingGroup = findExistingGroup(folderName);
+  const targetGroup = customGroup || existingGroup || detectGroup(title, descriptionText);
+
+  const modelDir = path.join(thirdpartyDir, targetGroup, folderName);
   const stlDir = path.join(modelDir, 'stl');
 
-  console.log(`Zielordner: thirdparty/${folderName}`);
+  console.log(`Zielordner: thirdparty/${targetGroup}/${folderName}`);
   fs.mkdirSync(modelDir, { recursive: true });
   fs.mkdirSync(stlDir, { recursive: true });
 
   // 2. readme.txt erstellen
   const readmePath = path.join(modelDir, 'readme.txt');
-  let descriptionText = cleanHtml(designData.summary || designData.description || '');
-
   let profileNotes = '';
   const selectedInstance = (designData.instances || []).find(i => i.id == profileId) || designData.instances?.[0];
   if (selectedInstance) {

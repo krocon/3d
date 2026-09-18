@@ -6,7 +6,7 @@ Dieses Dokument beschreibt die Projektarchitektur, Verzeichniskonventionen und d
 
 ## 1. Verzeichnisstruktur & Datenmodell
 
-Alle Drittanbieter-Modelle befinden sich unter `thirdparty/` geordnet nach Themengruppen (z. B. `Raspberry Pi`, `Mac`, `iPhone`, `Apple`, `Computergehäuse`, `Fotografie`, `Figuren`, `Kunst`, `Vase`, `Schale`, `Werkzeug`, `_Diverse`). Für jedes Modell gilt folgende feste Struktur:
+Alle Drittanbieter-Modelle befinden sich unter `thirdparty/` geordnet nach Themengruppen (z. B. `Autos`, `Leuchten`, `Behälter`, `Raspberry Pi`, `Mac`, `iPhone`, `Apple`, `Computergehäuse`, `Fotografie`, `Figuren`, `Kunst`, `Vase`, `Schale`, `Werkzeug`, `_Diverse`). Für jedes Modell gilt folgende feste Struktur:
 
 ```text
 thirdparty/
@@ -30,7 +30,7 @@ thirdparty/
 
 ### Vorschaubilder & Web-Viewer
 - Vorschaubilder werden in `public/thumbs/` abgelegt.
-- Nach jedem Hinzufügen oder Ändern von Bildern im `thirdparty/`-Verzeichnis **muss** folgender Befehl ausgeführt werden:
+- Nach jedem Hinzufügen, Verschieben oder Ändern von Bildern im `thirdparty/`-Verzeichnis **muss** folgender Befehl ausgeführt werden:
   ```bash
   npm run generate-thumbs
   ```
@@ -40,7 +40,7 @@ thirdparty/
 
 ## 2. MakerWorld Importer (`src/import-makerworld.js`)
 
-Der Importer automatisiert die Ordneranlage, das Schreiben der `readme.txt`, den Bild-Download und den Abruf der 3MF/STL-Dateien.
+Der Importer automatisiert die Ordneranlage innerhalb der passenden Themengruppe (automatische Erkennung oder manuelle Vorgabe), das Schreiben der `readme.txt`, den Bild-Download und den Abruf der 3MF/STL-Dateien.
 
 ### Aufruf-Optionen für neue Linklisten:
 
@@ -50,8 +50,8 @@ In `src/import-makerworld.js` das Array `URL_LIST` befüllen:
 export const URL_LIST = [
   'https://makerworld.com/de/models/1724774-pencil-container-a-pencil-shaped-container#profileId-1831063',
   'https://makerworld.com/de/models/3213113-big-kodak-film-roll-pen-holder-storage-box#profileId-3637348',
-  // Optional mit eigenem deutschem Titel:
-  { url: 'https://makerworld.com/de/models/...', title: 'Mein Modellname' }
+  // Optional mit eigenem deutschem Titel und/oder expliziter Themengruppe:
+  { url: 'https://makerworld.com/de/models/...', title: 'Mein Modellname', group: 'Behälter' }
 ];
 ```
 Danach ausführen:
@@ -123,7 +123,7 @@ await importUrls([
 
 ## 4. Wichtige Regeln für AI-Agents
 
-1. **Namenskonventionen:** Ordnernamen in `thirdparty/` dürfen niemals Slashes (`/`) enthalten; ersetze Slashes durch `-` (z. B. `Mac Mini M1-M2 Dock`).
+1. **Namens- und Strukturkonventionen:** Jedes Modell muss sich in einer Untergruppe unter `thirdparty/<Gruppe>/<Modellname>/` befinden (Standardgruppen: `Autos`, `Leuchten`, `Behälter`, `Raspberry Pi`, `Mac`, `iPhone`, `Apple`, `Computergehäuse`, `Fotografie`, `Figuren`, `Kunst`, `Vase`, `Schale`, `Werkzeug`, `_Diverse`). Ordnernamen dürfen niemals Slashes (`/`) enthalten; ersetze Slashes durch `-` (z. B. `Mac Mini M1-M2 Dock`).
 2. **Dateipfade:** STL-Dateien gehören **ausnahmslos** in das Unterverzeichnis `stl/` des jeweiligen Modells.
 3. **Bestehende Daten erhalten:** Überschreibe keine bestehenden manuell gepflegten Notizen oder STL-Dateien, es sei denn, der Nutzer fordert es explizit.
 4. **Thumbnail-Generierung:** Führe nach jeder Änderung an Bildern `npm run generate-thumbs` aus.
