@@ -128,3 +128,29 @@ await importUrls([
 3. **Bestehende Daten erhalten:** Überschreibe keine bestehenden manuell gepflegten Notizen oder STL-Dateien, es sei denn, der Nutzer fordert es explizit.
 4. **Thumbnail-Generierung:** Führe nach jeder Änderung an Bildern `npm run generate-thumbs` aus.
 5. **Portierbarkeit:** Verwende Node.js ECMAScript Modules (`import`/`export`) und halte `package.json` aktuell.
+
+---
+
+## 5. Standard-Workflow bei Nutzerbefehl: "Ergänze folgende Gruppen: ..."
+
+Sobald der Nutzer eine Eingabe nach dem Muster **„Ergänze folgende Gruppen: <Gruppenliste>“** (oder sinngemäß *„Ergänze die Gruppen: ...“*, *„Neue Gruppen anlegen: ...“*) tätigt, muss der AI-Agent eigenständig folgenden Standard-Workflow vollständig ausführen:
+
+1. **Ordneranlage in `thirdparty/`:**
+   - Für jede angegebene Gruppe das Verzeichnis `thirdparty/<Gruppe>/` anlegen (sofern noch nicht vorhanden).
+2. **Klassifizierung & Umgruppierung bestehender Modelle:**
+   - Alle bestehenden Modelle in `thirdparty/` (insbesondere aus `_Diverse`, aber auch aus anderen Gruppen bei thematischer Relevanz) scannen.
+   - Passende Modellordner per `git mv` (bzw. Filesystem-Move mit `git add`) in die neue(n) Gruppe(n) verschieben.
+   - Vollständigkeit aller Dateien (`readme.txt`, Bilder, `.3mf`, `stl/`) sicherstellen.
+3. **Skripte & Heuristik aktualisieren:**
+   - In `src/import-makerworld.js`:
+     - Das Array `KNOWN_GROUPS` um die neuen Gruppen erweitern.
+     - Die Heuristik-Funktion `detectGroup(title, description)` um treffsichere deutsche und englische Schlüsselwörter für die neuen Gruppen ergänzen, damit zukünftige MakerWorld-Imports automatisch richtig eingeordnet werden.
+   - In `public/index.html`:
+     - Den Suchfilter-Platzhalter `<input id="filter" placeholder="...">` aktualisieren.
+4. **Dokumentation in `AGENTS.md` pflegen:**
+   - Die Gruppenlisten in Abschnitt 1 und Abschnitt 4 (Regel 1) von `AGENTS.md` um die neuen Gruppen ergänzen.
+5. **Thumbnails generieren & bereinigen:**
+   - Befehl `npm run generate-thumbs` ausführen. Dadurch werden neue Thumbnails für die verschobenen Modelle erzeugt und verwaiste Alt-Thumbnails automatisch entfernt.
+6. **Verifikation & Rückmeldung:**
+   - Integrität und API-Ausgabe `/api/models` validieren.
+   - Dem Nutzer eine übersichtliche Zusammenfassung der neu angelegten Gruppen und verschobenen Modelle präsentieren.
