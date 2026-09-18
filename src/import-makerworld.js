@@ -30,16 +30,15 @@ const thirdpartyDir = path.join(process.cwd(), 'thirdparty');
  */
 export const URL_LIST = [
   // Trage hier deine MakerWorld-URLs ein:
-  'https://makerworld.com/de/models/1830521-panda-mini-gaming-case-3050-4060-5050-5060?from=search#profileId-1954846',
-  'https://makerworld.com/de/models/2700872-shrunk-ghost-s1-itx-case#profileId-2994055',
-  'https://makerworld.com/de/models/177147-photo-studio-light-box#profileId-194795',
-  'https://makerworld.com/de/models/1471547-design-lamp-led-lamp-kit-001?from=recommend#profileId-1535842',
-  'https://makerworld.com/de/models/3304820-japandi-star-bowl-autumn-decor-organizer?from=recommend#profileId-3751232',
-  'https://makerworld.com/de/models/2955778-atari-vcs-case-for-raspberry-pi-pi-5-4-3b?from=recommend#profileId-3312363',
-  'https://makerworld.com/de/models/3314912-raspberry-pi-5-split-case-official-active-cooler?from=recommend#profileId-3763591',
-  'https://makerworld.com/de/models/1063966-raspberry-pi-5-ai-m-2-hat-snap-case#profileId-1052672',
-  'https://makerworld.com/de/models/401206-raspberry-pi-5-pimoroni-nvme-case-v1#profileId-304588',
-  'https://makerworld.com/de/models/746241-raspberry-pi-5-case-fan-nvme-geekworm-x1001?from=search#profileId-1605496',
+  'https://makerworld.com/de/models/2109056-tintin-rocket-150-cm?from=search#profileId-2281542',
+  'https://makerworld.com/de/models/1055470-volkswagen-type-2-t1-double-cab#profileId-1042896',
+  'https://makerworld.com/de/models/1049043-porsche-911-turbo-930#profileId-1035371',
+  'https://makerworld.com/de/models/505292-1965-shelby-cobra#profileId-420962',
+  'https://makerworld.com/de/models/555215-mercedes-300-sl#profileId-473953',
+  'https://makerworld.com/de/models/3272457-micro-sd-card-storage-holder#profileId-3710824',
+  'https://makerworld.com/de/models/3279974-lemon-container-jar-textured-fruit-stash-box#profileId-3720249',
+  'https://makerworld.com/de/models/3296528-pen-holder#profileId-3740878',
+  'https://makerworld.com/de/models/1790082-working-magnetic-compass?from=search#profileId-1907642'
 ];
 
 // Helper to strip HTML tags and decode entities

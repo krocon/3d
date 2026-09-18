@@ -6,11 +6,12 @@
   "scripts": {
     "i": "npm install",
     "start": "node scripts/generate-thumbs.js && node src/server.js",
+    "quickstart": "node src/server.js",
     "dev": "vite",
     "generate-thumbs": "node scripts/generate-thumbs.js",
     "import-models": "node src/import-makerworld.js",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite previw"
   },
   "dependencies": {
     "ejs": "^3.1.10",
