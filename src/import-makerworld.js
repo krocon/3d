@@ -30,7 +30,20 @@ const thirdpartyDir = path.join(process.cwd(), 'thirdparty');
  */
 export const URL_LIST = [
   // Trage hier deine MakerWorld-URLs ein:
-  ''
+  'https://makerworld.com/de/models/2604148-nfc-3dlp-itx-pc-case-with-lp-gpu-support?from=search#profileId-2873660',
+  'https://makerworld.com/de/models/2261082-pc-case-mini-itx?from=search#profileId-2463570',
+  'https://makerworld.com/de/models/3067358-3-7l-itx-case-supports-up-to-5070mini?from=search#profileId-3452616',
+  'https://makerworld.com/de/models/1979514-fractal-north-itx?from=search#profileId-2129229',
+  'https://makerworld.com/de/models/1842823-mac-style-workstation-itx-case-vertical-inverted-v?from=recommend#profileId-1969004',
+  'https://makerworld.com/de/models/1988858-hdd-cage-1-6-bays?from=recommend#profileId-2681620',
+  'https://makerworld.com/de/models/206743-robot-vacuum-ramp?from=recommend#profileId-821776',
+  'https://makerworld.com/de/models/3161278-desktop-style-raspberry-pi-5-case-m-2-hat-fan#profileId-3572718',
+  'https://makerworld.com/de/models/1261216-cover-i-phone-12-pro-max?from=search#profileId-1285826',
+  'https://makerworld.com/de/models/501904-iphone-12-pro-max-cover-hexagon-design?from=search#profileId-417064',
+  'https://makerworld.com/de/models/3005430-apple-iphone-12-pro-max?from=search#profileId-3374839',
+  'https://makerworld.com/de/models/960944-iphone-12-pro-max-case?from=search#profileId-930886',
+  'https://makerworld.com/de/search/models?keyword=iphone+12+pro+max&isTrending=true',
+
 ];
 
 // Helper to strip HTML tags and decode entities
