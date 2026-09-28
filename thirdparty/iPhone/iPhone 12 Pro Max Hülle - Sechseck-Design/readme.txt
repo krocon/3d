@@ -1,6 +1,6 @@
 iPhone 12 Pro Max Hülle - Sechseck-Design
 
-https://makerworld.com/de/models/501904-iphone-12-pro-max-cover-hexagon-design?from=search#profileId-417064
+https://makerworld.com/de/models/501904-iphone-12-pro-max-cover-hexagon-design#profileId-417064
 
 MODEL: ONLY IPHONE 12PRO MAX
 
